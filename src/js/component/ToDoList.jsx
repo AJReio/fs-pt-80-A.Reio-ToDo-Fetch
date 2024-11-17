@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { library } from "webpack";
 
-const url = 'https://playground.4geeks.com/todo'
+
 
 function ToDoList() {
   const [userData, setUserData] = useState([]);
   const [chore, setChore] = useState('');
-  
+  const url = 'https://playground.4geeks.com/todo'
 
-
-  // ________________________________________________________
 
 
   useEffect(() => {
@@ -19,10 +16,6 @@ function ToDoList() {
   }, []);
 
 
-  // ________________________________________________________
-
-
-  // Creación de usuario ---------->
 
   const addUser = async () => {
     try {
@@ -40,7 +33,7 @@ function ToDoList() {
     }
   }
 
-  // Adqusición de datos del usuario ---------->
+
 
   const getUserData = async () => {
     try {
@@ -51,6 +44,13 @@ function ToDoList() {
     } catch (error) {
       console.log(error)
     }
+  }
+
+
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    createChore();
   }
 
 
@@ -68,33 +68,46 @@ function ToDoList() {
         body: JSON.stringify(payload)
       });
       if (!response.ok) throw new error('Something went wrong...');
-      const data = response.json();
+      const data = await response.json();
+      getUserData()
+      setChore('')
     } catch (error) {
       console.error(error)
     }
   }
 
 
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(url + '/todos/' + id, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Something went wrong...')
+      getUserData();
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
 
   console.log('user------>', userData);
 
 
-// ----- HTML ---------->
-
-return (
-  <div className="text-center">
-
-    <ul>
-      {userData.todos?.map(el=> <li key={el.id}>{el.label}</li>)}
-    </ul>
-
-
-  </div>
-);
-
+  return (
+    <div className="choreContainer">
+      <div className="text-center">
+        <form onSubmit={handleSubmit}>
+          <input type="text" value={chore} onChange={e => setChore(e.target.value)} required />
+        </form>
+        <ul>
+          {userData.todos?.map(el => <li key={el.id}>{el.label} <button className="deleteButton" onClick={e => handleDelete(el.id)}> Delete </button></li>)}
+          <p>{userData.todos?.length} More to go!</p>
+        </ul>
+      </div>
+    </div>
+  );
 }
 
 
-// // ___________________________________________________
 
 export default ToDoList;
